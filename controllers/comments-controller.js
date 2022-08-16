@@ -6,21 +6,22 @@ class CommentController {
     try {
       const user = req.user;
       const { text } = req.body;
-      const bookID = req.params.id
-      if(!text) throw {status : 400 , message : "text is empty"}
-      const findBook = await BookModel.findById(bookID)
-      if(!findBook) throw {status : 404 , message : `book with ${bookID} ID not found`}
+      const bookID = req.params.id;
+      if (!text) throw { status: 400, message: "text is empty" };
+      const findBook = await BookModel.findById(bookID);
+      if (!findBook)
+        throw { status: 404, message: `book with ${bookID} ID not found` };
       const addedComment = await CommentModel.create({
-          user : user._id,
-          book : bookID,
-          text
-        })
-      if(!addedComment) throw {status : 500 , message : "faild to ad comment"}
+        user: user._id,
+        book: bookID,
+        text,
+      });
+      if (!addedComment) throw { status: 500, message: "faild to ad comment" };
       res.status(200).json({
-        status : 200,
-        message : "comment added",
-        addedComment
-      })
+        status: 200,
+        message: "comment added",
+        addedComment,
+      });
     } catch (err) {
       next(err);
     }
@@ -28,6 +29,36 @@ class CommentController {
 
   async replayComment(req, res, next) {
     try {
+      const user = req.user;
+      const { replaydTo, bookID } = req.query;
+      const { text } = req.body;
+      if (!text) throw { status: 400, message: "text is empty" };
+      if (!replaydTo || !bookID)
+        throw { status: 400, message: "replaydTo OR book is empty" };
+      const findBook = await BookModel.findById(bookID);
+      if (!findBook)
+        throw { status: 404, message: `book with ${bookID} ID not found` };
+      const findComment = await CommentModel.findOne({
+        _id: replaydTo,
+        book: bookID,
+        status: "accepted",
+      });
+      if (!findComment)
+        throw {
+          status: 404,
+          message: `comment with ${replaydTo} ID not found`,
+        };
+      const addReplay = await CommentModel.create({
+        text,
+        user: user._id,
+        replaydTo,
+        bookID,
+      });
+      res.status(200).json({
+        status: 200,
+        message: "replay added",
+        addReplay,
+      });
     } catch (err) {
       next(err);
     }
@@ -42,16 +73,24 @@ class CommentController {
 
   async acceptComments(req, res, next) {
     try {
-        const commentID = req.params.id
-        const findComment = await CommentModel.findById(commentID)
-        if(!findComment) throw {status : 404 , message : `comment with ${commentID} ID not found`}
-        if(findComment.status == "accepted") throw {status : 400 , message : "this comment already accepted"}
-        const acceptedComment = await CommentModel.updateOne({_id : commentID} , {status : "accepted"})
-        res.status(200).json({
-            status : 200,
-            message : "comment accepted",
-            acceptStatus : acceptedComment
-        })
+      const commentID = req.params.id;
+      const findComment = await CommentModel.findById(commentID);
+      if (!findComment)
+        throw {
+          status: 404,
+          message: `comment with ${commentID} ID not found`,
+        };
+      if (findComment.status == "accepted")
+        throw { status: 400, message: "this comment already accepted" };
+      const acceptedComment = await CommentModel.updateOne(
+        { _id: commentID },
+        { status: "accepted" }
+      );
+      res.status(200).json({
+        status: 200,
+        message: "comment accepted",
+        acceptStatus: acceptedComment,
+      });
     } catch (err) {
       next(err);
     }

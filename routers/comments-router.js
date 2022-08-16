@@ -5,7 +5,8 @@ const router = require('express').Router()
 
 
 router.post("/add/:id" , autoLogin , commentController.addComment)
-router.post("/replay/:id" , autoLogin , commentController.replayComment)
+router.patch("/accept/:id" , autoLogin , commentController.acceptComments)
+router.post("/replay" , autoLogin , commentController.replayComment)
 
 
 

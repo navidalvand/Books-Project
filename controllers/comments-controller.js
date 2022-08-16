@@ -52,7 +52,7 @@ class CommentController {
         text,
         user: user._id,
         replaydTo,
-        bookID,
+        book: bookID,
       });
       res.status(200).json({
         status: 200,
@@ -66,6 +66,12 @@ class CommentController {
 
   async allComments(req, res, next) {
     try {
+        const allComments = await CommentModel.find({status : "accepted"})
+        res.status(200).json({
+            status : 200,
+            message : "all comments",
+            allComments
+        })
     } catch (err) {
       next(err);
     }
@@ -98,6 +104,16 @@ class CommentController {
 
   async rejectComments(req, res, next) {
     try {
+        const commentID = req.params.id
+        const findComment = await CommentModel.findById(commentID)
+        if(!findComment) throw {status : 404 , message : `comment with ${commentID} ID not found`}
+        if(findComment.status == "accepted") throw {status : 400 , message : "this comment already accepted"}
+        const rejectedComment = await CommentModel.deleteOne({_id : commentID})
+        res.status(200).json({
+            status : 200,
+            message : "comment rejected",
+            rejectedComment
+        })
     } catch (err) {
       next(err);
     }
@@ -105,6 +121,13 @@ class CommentController {
 
   async myComments(req, res, next) {
     try {
+        const user = req.user
+        const findComments = await CommentModel.find({user : user._id})
+        res.status(200).json({
+            status : 200,
+            message : "your comments",
+            comments : findComments
+        })
     } catch (err) {
       next(err);
     }
@@ -112,6 +135,19 @@ class CommentController {
 
   async bookComments(req, res, next) {
     try {
+      const bookID = req.params.id;
+      const findBook = await BookModel.findById(bookID);
+      if (!findBook)
+        throw { status: 404, message: `book with ${bookID} ID not found` };
+      const comments = await CommentModel.find({
+        book: bookID,
+        status: "accepted",
+      });
+      res.status(200).json({
+        status: 200,
+        message: "all comments",
+        comments,
+      });
     } catch (err) {
       next(err);
     }

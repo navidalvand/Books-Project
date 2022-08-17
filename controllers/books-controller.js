@@ -101,14 +101,18 @@ class BooksController {
   }
 
   async getBookById(req, res, next) {
-    const bookID = req.params.id;
-    const findBook = await BookModel.findById(bookID);
-    if (!findBook)
-      throw { status: 404, message: `book with ${bookID} ID not found` };
-    res.status(200).json({
-      status: 200,
-      book: findBook,
-    });
+    try {
+      const bookID = req.params.id;
+      const findBook = await BookModel.findById(bookID);
+      if (!findBook)
+        throw { status: 404, message: `book with ${bookID} ID not found` };
+      res.status(200).json({
+        status: 200,
+        book: findBook,
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 
   async getAllBooksByAuthor(req, res, next) {

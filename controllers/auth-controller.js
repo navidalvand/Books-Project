@@ -1,7 +1,6 @@
 const { validationResult } = require("express-validator");
 const { hashPassord, checkHash } = require("../functions/hash-password");
 const {
-  tokenValidator,
   tokenGenerator,
 } = require("../functions/token-functions");
 const { AuthorModel } = require("../models/author-model");
@@ -10,7 +9,7 @@ const { UserModel } = require("../models/users-model");
 class AuthController {
   async register(req, res, next) {
     try {
-      const { name, username, password, confirm_password, author, type } =
+      const { name, username, password, confirm_password, author, role } =
         req.body;
       const result = validationResult(req);
       if (result.errors.length > 0) {
@@ -25,18 +24,13 @@ class AuthController {
           if (password == confirm_password) {
             const hashedPassword = hashPassord(password);
             const token = tokenGenerator(username);
-            if (type)
-              if (type != "expert" && type != "amatur")
-                throw {
-                  status: 400,
-                  message: "type must be = amatur OR expert",
-                };
             const registeredAccount = await UserModel.create({
               name,
               username,
               password: hashedPassword,
               token,
               author,
+              role
             });
 
             if (author == true) {
@@ -44,7 +38,7 @@ class AuthController {
                 author_userID: registeredAccount._id,
                 username,
                 name,
-                type,
+                role
               });
             }
             res.send(registeredAccount);

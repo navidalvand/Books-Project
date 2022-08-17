@@ -4,6 +4,7 @@ const { UserModel } = require("../models/users-model");
 class UserController {
   async getAllUsers(req, res, next) {
     try {
+      console.log(req.body);
       const users = await UserModel.find();
       res.status(200).json({
         ststus: 200,
@@ -57,7 +58,6 @@ class UserController {
     try {
       const userID = req.params.id;
       const user = await UserModel.findById(userID);
-      console.log(user);
       if (!user) throw { status: 404, message: "user with this ID not found" };
       res.status(200).json({
         status: 200,

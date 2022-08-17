@@ -1,11 +1,13 @@
 class Server {
   #http = require("http");
-  #path = require("path");
   #express = require("express");
   #app = this.#express();
+  #swaggerUI = require("swagger-ui-express");
+  #swaggerJSDoc = require("swagger-jsdoc");
   #allRouters = require("./routers/router.js");
   #mongoose = require("mongoose");
   #consoleSpace = require("./app");
+  #options = require("./config/swagger/main.js");
 
   constructor() {
     this.configOtherFeatures();
@@ -26,7 +28,12 @@ class Server {
   }
 
   configSwagger() {
-    
+    const specs = this.#swaggerJSDoc(this.#options);
+    this.#app.use(
+      "/api-docs",
+      this.#swaggerUI.serve,
+      this.#swaggerUI.setup(specs)
+    );
   }
 
   configIncomingRequests() {

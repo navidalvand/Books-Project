@@ -66,12 +66,12 @@ class CommentController {
 
   async allComments(req, res, next) {
     try {
-        const allComments = await CommentModel.find({status : "accepted"})
-        res.status(200).json({
-            status : 200,
-            message : "all comments",
-            allComments
-        })
+      const allComments = await CommentModel.find({ status: "accepted" });
+      res.status(200).json({
+        status: 200,
+        message: "all comments",
+        allComments,
+      });
     } catch (err) {
       next(err);
     }
@@ -79,6 +79,9 @@ class CommentController {
 
   async acceptComments(req, res, next) {
     try {
+      const user = req.user;
+      if (user.role != "admin")
+        throw { status: 400, message: "you don't have an access" };
       const commentID = req.params.id;
       const findComment = await CommentModel.findById(commentID);
       if (!findComment)
@@ -104,16 +107,24 @@ class CommentController {
 
   async rejectComments(req, res, next) {
     try {
-        const commentID = req.params.id
-        const findComment = await CommentModel.findById(commentID)
-        if(!findComment) throw {status : 404 , message : `comment with ${commentID} ID not found`}
-        if(findComment.status == "accepted") throw {status : 400 , message : "this comment already accepted"}
-        const rejectedComment = await CommentModel.deleteOne({_id : commentID})
-        res.status(200).json({
-            status : 200,
-            message : "comment rejected",
-            rejectedComment
-        })
+      const user = req.user;
+      if (user.role != "admin")
+        throw { status: 400, message: "you don't have an access" };
+      const commentID = req.params.id;
+      const findComment = await CommentModel.findById(commentID);
+      if (!findComment)
+        throw {
+          status: 404,
+          message: `comment with ${commentID} ID not found`,
+        };
+      if (findComment.status == "accepted")
+        throw { status: 400, message: "this comment already accepted" };
+      const rejectedComment = await CommentModel.deleteOne({ _id: commentID });
+      res.status(200).json({
+        status: 200,
+        message: "comment rejected",
+        rejectedComment,
+      });
     } catch (err) {
       next(err);
     }
@@ -121,13 +132,13 @@ class CommentController {
 
   async myComments(req, res, next) {
     try {
-        const user = req.user
-        const findComments = await CommentModel.find({user : user._id})
-        res.status(200).json({
-            status : 200,
-            message : "your comments",
-            comments : findComments
-        })
+      const user = req.user;
+      const findComments = await CommentModel.find({ user: user._id });
+      res.status(200).json({
+        status: 200,
+        message: "your comments",
+        comments: findComments,
+      });
     } catch (err) {
       next(err);
     }

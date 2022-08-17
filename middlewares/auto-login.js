@@ -3,7 +3,7 @@ const { UserModel } = require("../models/users-model");
 
 const autoLogin = async (req, res, next) => {
   try {
-    const authorization = req?.headers?.authorization;
+    const authorization = req?.headers?.authentication;
     if (!authorization) {
       throw { status: 401, message: "please login into your account" };
     } else {

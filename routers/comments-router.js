@@ -1,16 +1,15 @@
 const { commentController } = require('../controllers/comments-controller')
-const { autoLogin } = require('../middlewares/auto-login')
 
 const router = require('express').Router()
 
 
-router.post("/add/:id" , autoLogin , commentController.addComment)
-router.patch("/accept/:id" , autoLogin , commentController.acceptComments)
-router.patch("/reject/:id" , autoLogin , commentController.rejectComments)
-router.post("/replay" , autoLogin , commentController.replayComment)
-router.get("/book/all/:id" , autoLogin , commentController.bookComments)
-router.get("/all" , autoLogin , commentController.allComments)
-router.get("/user" , autoLogin , commentController.myComments)
+router.post("/add/:id" , commentController.addComment)
+router.patch("/accept/:id" , commentController.acceptComments)
+router.patch("/reject/:id" , commentController.rejectComments)
+router.post("/replay" , commentController.replayComment)
+router.get("/book/all/:id" , commentController.bookComments)
+router.get("/all" , commentController.allComments)
+router.get("/user" , commentController.myComments)
 
 
 
